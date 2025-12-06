@@ -11,7 +11,7 @@
    state:present
 
   -name:Enable Nginx
-   ansible.builtin.service
+   ansible.builtin.service:
    name:Nginx
    state:started
    enabled:yes
