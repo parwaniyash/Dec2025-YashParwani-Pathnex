@@ -1,0 +1,121 @@
+#Ansible Playbook
+---
+-name:Install and Enable Nginx
+ hosts:all
+ become:yes
+
+ tasks:
+  -name:Install Nginx
+   ansible.builtin.apt:
+   name:Nginx
+   state:present
+
+  -name:Enable Nginx
+   ansible.builtin.service
+   name:Nginx
+   state:started
+   enabled:yes
+=====================
+#Terraform EC2
+provider "aws" {
+region = "ap-southeast-2"
+}
+
+resource "aws_instance" "Pathnex-EC2" {
+ami = "01234abcd"
+instance_type = "r5.2xlarge"
+
+tags = {
+Name = "Pathnex-EC2"
+Environment = "Environment"
+owner = "PathNexStudent"
+}
+}
+================
+#Kubernetes Deployment with 2 replicas
+
+api version : apps/v1
+kind : Deployment
+metadata:
+ name: pathnex-deployment
+spec:
+ replicas:2
+ selector:
+  matchlables:
+   app: pathnex-app
+ template:
+  metadata:
+  lables:
+   app: pathnex-app
+spec:
+ containers:
+  - name: app
+    image: nginx:latest
+    ports:
+     - containerport: 80
+==============================
+#Linux Bash script
+#! Disk usage
+df -h
+============================
+#Git Lab CI Pipeline for Compile , test and and package Java Project using Maven
+
+stages:
+-build
+-test
+-package
+
+ maven-build:
+  stage:build
+  image:maven:3.8.1-jdk-17
+  script:
+    - git clone https://github.com/Pathnex/sample-java-app.git
+    - cd sample-java-app
+    - mvn clean compile
+
+ maven-test:
+  stage:test
+  image:maven:3.8.1-jdk-17
+  script:
+    - cd sample-java-app
+    - mvn test
+
+ maven-package
+  stage:package
+  image:maven:3.8.1-jdk-17
+  script:
+    - cd sample-java-app
+    - mvn package
+=============================================
+#Jenkins Pipeline for build , test and package Java project using Maven
+
+pipeline {
+ agent any
+ tools {
+   maven 'Maven-3.8.1'
+   jdk 'JDK-17'
+}
+
+stages{
+ stage('checkout'){
+ steps {
+  git url : 'https://github.com/Pathnex/sample-java-app.git'
+}
+}
+ stage('compile'){
+ steps {
+  sh 'mvn clean compile'
+}
+}
+ stage('test') {
+ steps {
+ sh 'mvn test'
+}
+}
+ stage('package') {
+ steps {
+  sh 'mvn package'
+}
+}
+}
+}
