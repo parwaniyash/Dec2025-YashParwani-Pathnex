@@ -1,20 +1,19 @@
 #Ansible Playbook
 ---
--name:Install and enable Nginx
- hosts:all
- become:yes
+- name: Install and enable Nginx
+  hosts: all
+  become: yes
  
-tasks:
-	-name:Install Nginx
-	ansible.builtin.apt:
-	name:apt
-	state:present
-	
-	-name:Enable Nginx
-	ansible.builtin.service:
-	name:apt
-	state:started
-	enabled:yes
+  tasks:
+    - name: Install Nginx
+      yum:
+        name: nginx
+        state: present
+    - name: Enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
 ===========================================
 #Terraform EC2 instance
 provider "aws" {
@@ -37,42 +36,42 @@ resource "aws_instance" "Pathnex-EC2" {
 df -h
 =============================
 #Kubernetes Pod
-api version: v1
-kind: pod
+apiVersion: v1
+kind: Pod
 metadata:
-	name: pathnex-pod
+  name: pathnex-pod
 spec:
-	containers:
-		-name: web
-		 image: nginx:latest
-		 ports:
-			- containerport: 80
+  containers:
+    - name: web
+      image: nginx:latest
+      ports:
+        - containerPort: 80
 ================================
 #GitlabCI Pipeline
 stages:
-- checkout
+  - checkout
 
-	git-checkout:
-		stage: checkout
-		script:
-		- git clone https://github.com/Pathnex/sample-java-app.git
-		- cd sample-java-app
-		- ls -la
+git-checkout:
+  stage: checkout
+  script:
+    - git clone https://github.com/Pathnex/sample-java-app.git
+    - cd sample-java-app
+    - ls -la
 ===========================
 #Jenkins Pipeline
 pipeline {
-	agent any
-	stages {
-		stage('checkout') {
-			steps {
-			git branch: 'main' ,url: 'https://github.com/Pathnex/sample-java-app.git'
-			}
-		}
-		stage('list files') {
-			steps {
-			sh 'ls -la'
-			}
-		}
-	}
+  agent any
+  stages {
+    stage('checkout') {
+      steps {
+        git branch: 'main' ,url: 'https://github.com/Pathnex/sample-java-app.git'
+      }
+    }
+    stage('list files') {
+      steps {
+        sh 'ls -la'
+      }
+    }
+  }
 }
 
