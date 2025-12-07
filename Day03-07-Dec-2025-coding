@@ -1,0 +1,124 @@
+#Ansible create user
+---
+- name: create user playbook
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: create user
+      user:
+        name: Pathnex
+        shell: /bin/bash
+
+#Terraform — Security Group
+provider "aws" {
+region = "us-east-1"
+}
+
+resource "aws_security_group" "PathnexSG" {
+  name = "PathnexSG"
+  description = "SG"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "PathnexEC2" {
+  ami                    = "ami-0abcd1234abcd1234"
+  instance_type          = "r6i.4xlarge"
+  vpc_security_group_ids = [aws_security_group.PathnexSG.id]
+
+  tags = {
+    Name = "Pathnex-EC2"
+  }
+}
+
+#Kubernetes Add environment Variable
+apiVersion: v1
+kind: pod
+metadata: 
+  name: pathnex-env-pod
+spec:
+  containers:
+    - name: app
+      image: nginx
+      env:
+        - name: APP_ENV
+          value: "production"
+
+#Bash script
+#! /bin/bash
+FILE= "/tmp/pathnex.txt"
+
+if [-f "$FILE"]; then
+  echo "File exists"
+else
+  echo "File doesnt exist"
+fi
+
+#Getlab CI pipeline-Node JS build
+stages:
+  - install
+  - test
+  - build
+
+node-install:
+  stage: install
+  image: node:16
+  script:
+    - git clone https://github.com/Pathnex/sample-node-app.git
+    - cd sample-node-app
+    - npm install
+
+node-test:
+  stage: test
+  image: node:16
+  script:
+    - cd sample-node-app
+    - npm test
+
+node-build:
+  stage: build
+  image: node:16
+  script:
+    - cd sample-node-app
+    - npm run build
+
+#Jenkins Pipeline
+
+pipeline {
+  agent any
+  tools {
+    nodejs 'NodeJS-16'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git url: 'https://github.com/Pathnex/sample-node-app.git'
+      }
+    }
+
+    stage('Install dependencies') {
+      steps {
+        sh 'npm install'
+      }
+    }
+
+    stage('Run tests') {
+      steps {
+        sh 'npm test'
+      }
+    }
+
+    stage('build') {
+      steps {
+        sh 'npm build'
+      }
+    }
+  }
+}
