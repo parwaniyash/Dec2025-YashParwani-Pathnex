@@ -1,0 +1,51 @@
+---
+- name: Install Nginx
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Install Nginx
+      apt:
+      name: nginx
+        state: present
+#terraform -EC2
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "pathnex-ec2" {
+  ami = "0123abcd"
+  instance_type = "m5.12xlarge"
+
+  tags = {
+    name = "pathnex-ec2"
+    owner = "admin"
+    environment = "production"
+  }
+}
+
+#Kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pathnex-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLables:
+      app: pathnex-app
+  template:
+    metadata:
+      labels:
+        app: pathnex-app
+    spec:
+      containers:
+      - name: app
+        image: nginx
+        ports:
+            - containerPort: 80
+#Linux Bash script
+#! /bin/bash
+echo "Today date is $(date)"
+echo "uptime is $(uptime)"
+
